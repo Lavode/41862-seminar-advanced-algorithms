@@ -21,6 +21,7 @@
 
 % Operators for common operations
 \DeclareMathOperator{\DFT}{DFT}
+\DeclareMathOperator{\DWT}{DWT}
 \DeclareMathOperator{\FFT}{FFT}
 
 % Code listings
@@ -167,8 +168,8 @@
 		\note{Usual definition over field of complex numbers. We will (later) use it over a finite field}
 
 		\begin{align*}
-				\operatorname{DFT}(x): X_i & = \sum_{i=0}^{n-1} x_i \cdot g^{-i \cdot k} \\
-				\operatorname{DFT}^{-1}(X): x_i & = \frac{1}{n} \sum_{i=0}^{n-1} X_i \cdot g^{i \cdot k}
+				\DFT(x): X_k & = \sum_{j=0}^{n-1} x_j \cdot g^{-j k} \\
+				\DFT^{-1}(X): x_j & = \frac{1}{n} \sum_{k=0}^{n-1} X_k \cdot g^{j k}
 		\end{align*}
 
 		Where $g$ is a primitive $n$-th root of unity (i.e. $g^n = 1$, $g^m
@@ -362,7 +363,7 @@
 				\State $X \gets$ \Call{DFT}{x}
 				\State $Y \gets$ \Call{DFT}{y}
 				\\
-				\State $Z \gets X \times Y$ \Comment{Dyadic product}
+				\State $Z \gets X \cdot Y$ \Comment{Dyadic product}
 				\\
 				\State $z \gets$ $\Call{DFT}{Z}^{-1}$
 				\State $z \gets$ \Call{round}{z}
@@ -383,16 +384,304 @@
 				  \State $z_n \gets v \mod B$
 				  \State $carry \gets v / B$ \Comment{Integer division}
 				\EndFor
-				\State \textbf{Return} $carry || z_n || \ldots || z_0$ \Comment{Optionally remove leading 0s}
+				\State \textbf{Return} $z_0 || z_1 || \ldots || z_n || carry$ \Comment{Optionally remove high-order 0s}
 				\EndFunction
 		\end{algorithmic}
 \end{frame}
 
 \section{Schönhage-Strassen algorithm}
 
+\begin{frame}
+		\frametitle{\secname}
+
+		\textbf{Goal}: Work in a more convenient algebraic domain than the
+		field of complex numbers.
+
+		Transform the signal components into elements of the ring
+		$\mathbb{Z}_{2^m + 1}$. Then:
+
+		\begin{itemize}
+				\item No rounding problems
+				\item Integer operations more performant than floating-point
+						operations
+				\item Multiplication and division by multiples of two can be
+						optimized further
+		\end{itemize}
+
+\end{frame}
+
+\subsection{Discrete Weighted Transform (DWT)}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Let $x, a$ be length-$n$ signals. Then we define the \textbf{discrete weighted transform}:
+		\begin{align*}
+				\DWT(x, a) : X_k & = \sum_{j=0}^{n-1} (a_j \cdot x_j) \cdot g^{-jk} \\
+				\DWT^{-1}(X, a) : x_j & = \frac{1}{n a_j} \cdot \sum_{k = 0}^{n - 1} X_k \cdot g^{jk}
+		\end{align*}
+
+		It is clear that:
+		\begin{align*}
+				\DWT(x, a) = \DFT(x \cdot a)
+		\end{align*}
+\end{frame}
+
+\subsection{Weighted cyclic convolution}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Given a weight vector $a$, the \textbf{weighted cyclic} convolution $z
+		= x \times_a y$ is $n$-length discrete signal with components:
+		\[
+				z_k \coloneqq \frac{1}{a_k} \sum_{i + j \equiv k \pmod{n}} (x_i \cdot a_i) \cdot (y_j \cdot a_j)
+		\]
+\end{frame}
+
+\subsection{Weighted convolution theorem}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Recall the convolution theorem which allowed to calculate a cyclic
+		convolution using the DFT. Equivalently, the DWT can be used to
+		calculate the weighted cyclic convolution:
+		\[
+				x \times_a y = \DWT^{-1}(\DWT(x, a) \cdot \DWT(y, a), a)
+		\]
+
+		We can use this --- with an appropriate weight vector $a$ --- to
+		calculate \textbf{other} convolutions. Let $A$ be a primitive $2n$-th
+		root of unity, $a = (A^j)$ then:
+		\begin{align*}
+				x \times_{\_} y & = x \times_a y
+		\end{align*}
+\end{frame}
+
+\subsection{Core idea}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Core idae of Schönhage-Strassen: Work in $\mathbb{Z} / N \mathbb{Z}$,
+		where $N = 2^n + 1$ for an integer $n$. Then choose $D = 2^k$ such that
+		$D | n$ to be the number of parts into which we split our numbers. Then:
+
+		\begin{itemize}
+				% \item Any positive integer $x < F_n$ can be (non-uniquely)
+				% 		represented as a $2^n + 1$ bit string
+				\item Reduction modulo $2^n + 1$ can be done efficiently
+				\item Primtive roots of unity have the form $2^k$, allowing for
+						efficient operations
+				\note{In fact, $2$ is a $2^{n+1}$-th primitive root of unity.}
+		\end{itemize}
+
+		% The core idea of Schönhage-Strassen is to choose a modulus of a Ferma prime $F_n = 2^{2^{n}} + 1$$N = 2^n +
+		% 1$, such that $P = 2^p | n$, where $P$ will be the number of parts into
+		% which we split our input.
+\end{frame}
+
+
+\subsection{Algorithm}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Consider two integers $0 \leq x, y < 2^n + 1$.
+
+		\begin{algorithmic}[1]
+				\Function{Schönhage-Strasse-Mult}{$x, y$}
+				\State $D \gets 2^k$ such that $D | n$
+				\State $M \gets 2^l$ such that $DM = n$
+				\State Pick smallest $n' \geq 2M + k$ such that $n' = DM'$
+				\algstore{ssmult}
+		\end{algorithmic}
+
+		$n'$ chosen to be large enough to accomodate largest possible element
+		of convolution, yet small enough ($n' < n$) so that recursion makes
+		progress.
+\end{frame}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Split the input numbers into $D$ parts of $M$ bits each.
+		\note{Split input signal is now a base-$2M$ representation of the original number}
+
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\State $X \gets $\Call{Split}{x, D}
+				\State $Y \gets $\Call{Split}{y, D}
+				\algstore{ssmult}
+		\end{algorithmic}
+\end{frame}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Calculate the DWT using appropriate weight vectors. Recall that
+		multiplication with roots of unity can be done efficiently.
+
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\For{$i \gets 0, D$}
+				\State $X_i \gets (2^{jM'} X_i) \bmod (2^{n'} + 1)$
+				\State $Y_i \gets (2^{jM'} Y_i) \bmod (2^{n'} + 1)$
+				\EndFor
+				\\
+				\State $X \gets$ \Call{DFT}{X}
+				\State $Y \gets$ \Call{DFT}{Y}
+				\algstore{ssmult}
+		\end{algorithmic}
+
+		\[
+				x \times_a y = \DWT^{-1}({\color{red}\DWT(x, a)} \cdot {\color{red}\DWT(y, a)}, a)
+		\]
+\end{frame}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Dyadic multiplication stage. These multiplications can be done
+		recursively, or with any other multiplication algorithm.
+
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\For{$i \gets 0, D$}
+				\State $X_i \gets X_i Y_i \bmod(2^{n'} + 1)$
+				\EndFor
+				\algstore{ssmult}
+		\end{algorithmic}
+
+		\[
+				x \times_a y = \DWT^{-1}(\DWT(x, a) {\color{red}\cdot} \DWT(y, a), a)
+		\]
+\end{frame}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Calculate the inverse discrete weighted transform.
+
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\State $X \gets$ \Call{DFT}{A}
+
+				\For{$i \gets 0, D$}
+				\State $Z_i \gets X_{D - i} / 2^{k + jM'} \bmod (2^{n'} + 1)$
+				\algstore{ssmult}
+		\end{algorithmic}
+
+		Observe how, rather than calculating the inverse DFT directly, this
+		calculates it by means of the DFT and then switching the order of the
+		output signal's components, as shown by Duhamel et
+		al\autocite{duhamelComputingInverseDFT1988}.
+
+		\[
+				x \times_a y = {\color{red}\DWT^{-1}}(\DWT(x, a) \cdot \DWT(y, a), a)
+		\]
+\end{frame}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Adjust sign if value $Z_i$ exceeds largest possible value $(i + 1)
+		\cdot 2^{2N / 2^k}$ of $i$-th element.
+
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\If{$Z_i > (i + 1) \cdot 2^{2M}$}
+				\State $Z_i \gets Z_i - (2^{n'} + 1)$
+				\EndIf
+				\EndFor
+				\algstore{ssmult}
+		\end{algorithmic}
+\end{frame}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Perform carry operation
+
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\State $carry \gets 0$
+				\For{$i \gets 0$ to $D$}
+				  \State $v \gets Z_i + carry$
+				  \State $Z_i \gets v \mod 2^M$
+				  \State $carry \gets v / 2^M$ \Comment{Integer division}
+				\EndFor
+				\If{$carry > 0$}
+				\State Include $carry$ as high-order word $Z_{D+1}$
+				\EndIf
+				\algstore{ssmult}
+		\end{algorithmic}
+\end{frame}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Finally returning the product $x \cdot y \bmod 2^n + 1$.
+
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\State \textbf{Return} $\{Z_0, Z_1, \ldots, Z_{D+1}\}$ \Comment{Product in base $2^M$}
+				\EndFunction
+		\end{algorithmic}
+\end{frame}
+
+\subsection{Complexity}
+
+\begin{frame}
+		\frametitle{\secname}
+		\framesubtitle{\subsecname}
+
+		Analysis shows that the Schönhage-Strassen algorithm has an asymptotic
+		complexity of
+		\[
+				O(n \cdot \log(n) \cdot \log(\log(n)))
+		\]
+
+		Schönhage and Strassen conjecture that an optimal complexity for integer multiplication of
+		\[
+				O(n \cdot \log(n))
+		\]
+		can be achieved.
+
+
+\end{frame}
+
 \section{Summary}
 
 \begin{frame}
+		\frametitle{\secname}
+
+		We have seen:
+		\begin{itemize}
+				\item How to model an integer multiplication as an acyclic convolution
+				\item How to express convolutions as a sequence of DFT, DWT and dyadic products
+				\item How to efficiently calcualte the DFT and DWT using the FFT
+				\item How to transform the work into a domain where many of the
+						operations are much more efficient
+		\end{itemize}
+\end{frame}
+
+\section{References}
+
+\begin{frame}[allowframebreaks]
 		\frametitle{References}
 		\printbibliography
 \end{frame}
