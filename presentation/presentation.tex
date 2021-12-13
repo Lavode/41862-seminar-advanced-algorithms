@@ -234,7 +234,7 @@
  				\column{0.5\textwidth}
 				\textbf{Acyclic} convolution $u = x \times_A y$ is $2n$-length discrete
 				signal with components:
-				\note{Observe: Acyclic separates cylic into those where addition `wrapped around' vs those where it didn't}
+				\note{Observe: Acyclic separates cyclic into those where addition `wrapped around' vs those where it didn't}
 				\begin{align*}
 						u_k & \coloneqq \sum_{i + j = n} x_i \cdot y_j \\
 						u_{2n - 1} & \coloneqq 0
@@ -405,7 +405,7 @@
 				\item Integer operations more performant than floating-point
 						operations
 				\item Multiplication and division by multiples of two can be
-						optimized further
+						optimised further
 		\end{itemize}
 
 \end{frame}
@@ -468,7 +468,7 @@
 		\frametitle{\secname}
 		\framesubtitle{\subsecname}
 
-		Core idae of Schönhage-Strassen: Work in $\mathbb{Z} / N \mathbb{Z}$,
+		Core idea of Schönhage-Strassen: Work in $\mathbb{Z} / N \mathbb{Z}$,
 		where $N = 2^n + 1$ for an integer $n$. Then choose $D = 2^k$ such that
 		$D | n$ to be the number of parts into which we split our numbers. Then:
 
@@ -476,7 +476,7 @@
 				% \item Any positive integer $x < F_n$ can be (non-uniquely)
 				% 		represented as a $2^n + 1$ bit string
 				\item Reduction modulo $2^n + 1$ can be done efficiently
-				\item Primtive roots of unity have the form $2^k$, allowing for
+				\item Primitive roots of unity have the form $2^k$, allowing for
 						efficient operations
 				\note{In fact, $2$ is a $2^{n+1}$-th primitive root of unity.}
 		\end{itemize}
@@ -496,14 +496,14 @@
 		Consider two integers $0 \leq x, y < 2^n + 1$.
 
 		\begin{algorithmic}[1]
-				\Function{Schönhage-Strasse-Mult}{$x, y$}
+				\Function{Schönhage-Strassen-Mult}{$x, y$}
 				\State $D \gets 2^k$ such that $D | n$
 				\State $M \gets 2^l$ such that $DM = n$
 				\State Pick smallest $n' \geq 2M + k$ such that $n' = DM'$
 				\algstore{ssmult}
 		\end{algorithmic}
 
-		$n'$ chosen to be large enough to accomodate largest possible element
+		$n'$ chosen to be large enough to accommodate largest possible element
 		of convolution, yet small enough ($n' < n$) so that recursion makes
 		progress.
 \end{frame}
@@ -673,7 +673,7 @@
 		\begin{itemize}
 				\item How to model an integer multiplication as an acyclic convolution
 				\item How to express convolutions as a sequence of DFT, DWT and dyadic products
-				\item How to efficiently calcualte the DFT and DWT using the FFT
+				\item How to efficiently calculate the DFT and DWT using the FFT
 				\item How to transform the work into a domain where many of the
 						operations are much more efficient
 		\end{itemize}
