@@ -98,7 +98,7 @@
 
 		\begin{itemize}
 				\item Given $x, y$ two $n$-bit integers
-				\item Where $x = x_0, x_1, \ldots, x_{n-1}$, $y = y_0, y_1, \ldots, y_{n-1}$ little-endian representation
+				\item Where $x = x_0, x_1, \ldots, x_{n-1}$, $y = y_0, y_1, \ldots, y_{n-1}$ big-endian representation
 				\item Calculate $z \coloneqq x \cdot y$
 		\end{itemize}
 \end{frame}
@@ -124,7 +124,7 @@
 		\framesubtitle{\subsecname}
 
 		\begin{itemize}
-				\item Anatoly Karatsuba, 1960, attended seminar of Kolmogorov
+				\item Anatoly Karatsuba, 1960
 				\item Idea: Work in large base $W$
 				\item $x = x_0 + x_1 \cdot W$, where $x_0, x_1 \in [0, W - 1]$
 				\item Karatsuba relation
@@ -234,7 +234,7 @@
  				\column{0.5\textwidth}
 				\textbf{Acyclic} convolution $u = x \times_A y$ is $2n$-length discrete
 				signal with components:
-				\note{Observe: Acyclic separates cyclic into those where addition `wrapped around' vs those where it didn't}
+				\note{Observe: Acyclic separates cylic into those where addition `wrapped around' vs those where it didn't}
 				\begin{align*}
 						u_k & \coloneqq \sum_{i + j = n} x_i \cdot y_j \\
 						u_{2n - 1} & \coloneqq 0
@@ -405,7 +405,7 @@
 				\item Integer operations more performant than floating-point
 						operations
 				\item Multiplication and division by multiples of two can be
-						optimised further
+						optimized further
 		\end{itemize}
 
 \end{frame}
@@ -468,7 +468,7 @@
 		\frametitle{\secname}
 		\framesubtitle{\subsecname}
 
-		Core idea of Schönhage-Strassen: Work in $\mathbb{Z} / N \mathbb{Z}$,
+		Core idae of Schönhage-Strassen: Work in $\mathbb{Z} / N \mathbb{Z}$,
 		where $N = 2^n + 1$ for an integer $n$. Then choose $D = 2^k$ such that
 		$D | n$ to be the number of parts into which we split our numbers. Then:
 
@@ -476,7 +476,7 @@
 				% \item Any positive integer $x < F_n$ can be (non-uniquely)
 				% 		represented as a $2^n + 1$ bit string
 				\item Reduction modulo $2^n + 1$ can be done efficiently
-				\item Primitive roots of unity have the form $2^k$, allowing for
+				\item Primtive roots of unity have the form $2^k$, allowing for
 						efficient operations
 				\note{In fact, $2$ is a $2^{n+1}$-th primitive root of unity.}
 		\end{itemize}
@@ -496,14 +496,14 @@
 		Consider two integers $0 \leq x, y < 2^n + 1$.
 
 		\begin{algorithmic}[1]
-				\Function{Schönhage-Strassen-Mult}{$x, y$}
+				\Function{Schönhage-Strasse-Mult}{$x, y$}
 				\State $D \gets 2^k$ such that $D | n$
 				\State $M \gets 2^l$ such that $DM = n$
 				\State Pick smallest $n' \geq 2M + k$ such that $n' = DM'$
 				\algstore{ssmult}
 		\end{algorithmic}
 
-		$n'$ chosen to be large enough to accommodate largest possible element
+		$n'$ chosen to be large enough to accomodate largest possible element
 		of convolution, yet small enough ($n' < n$) so that recursion makes
 		progress.
 \end{frame}
@@ -513,7 +513,7 @@
 		\framesubtitle{\subsecname}
 
 		Split the input numbers into $D$ parts of $M$ bits each.
-		\note{Split input signal is now a base-$2^M$ representation of the original number}
+		\note{Split input signal is now a base-$2M$ representation of the original number}
 
 		\begin{algorithmic}[1]
 				\algrestore{ssmult}
@@ -521,8 +521,6 @@
 				\State $Y \gets $\Call{Split}{y, D}
 				\algstore{ssmult}
 		\end{algorithmic}
-
-		Hence $X, Y$ will be base-$2^M$ representation of $x, y$.
 \end{frame}
 
 \begin{frame}
@@ -553,10 +551,8 @@
 		\frametitle{\secname}
 		\framesubtitle{\subsecname}
 
-		Dyadic multiplication stage.
-
-		\textbf{These multiplications can be done recursively}, or with any other
-		multiplication algorithm.
+		Dyadic multiplication stage. These multiplications can be done
+		recursively, or with any other multiplication algorithm.
 
 		\begin{algorithmic}[1]
 				\algrestore{ssmult}
@@ -579,7 +575,7 @@
 
 		\begin{algorithmic}[1]
 				\algrestore{ssmult}
-				\State $X \gets$ \Call{DFT}{X}
+				\State $X \gets$ \Call{DFT}{A}
 
 				\For{$i \gets 0, D$}
 				\State $Z_i \gets X_{D - i} / 2^{k + jM'} \bmod (2^{n'} + 1)$
@@ -647,20 +643,6 @@
 		\end{algorithmic}
 \end{frame}
 
-\subsection{Advantages}
-
-\begin{frame}
-		\frametitle{\secname}
-		\framesubtitle{\subsecname}
-
-		\begin{itemize}
-				\item Recursion is easily possible. Each level reduces one
-						size-$2^{kl}$ input to $2^l$ size $2^k$ inputs.
-				\item Many operations are with powers of two
-				\item It's integers all the way
-		\end{itemize}
-\end{frame}
-
 \subsection{Complexity}
 
 \begin{frame}
@@ -679,46 +661,19 @@
 		\]
 		can be achieved.
 
-		Current state of the art: Fürer's algorithm with:
-		\[
-				O(n \cdot \log(n) \cdot 2^{O(\log*(n))})
-		\]
+
 \end{frame}
 
 \section{Summary}
 
-\subsection{Applicability of multiplication algorithms}
-
 \begin{frame}
 		\frametitle{\secname}
-		\framesubtitle{\subsecname}
-
-		Depending on the bit-size $n$ of integers $x, y$, different algorithms
-		perform best for the integer multiplication $x \cdot y$. Generally,
-		algorithms with better asymptotic performance have more overhead, so
-		are not as suitable for small multiplications. Consider these rough
-		guidelines:
-
-		\begin{description}
-				\item[Up to hardware word size (e.g. $2^{64}$] Direct multiplication in hardware
-				\item[After $512$ bits] Karatsuba / Toom-Cook
-				\item[After $2^{2^{16}} = 65536$ bits] Schönhage-Strassen
-				\item[After $2^{2^{64}}$ bits] Fürer's algorithm
-		\end{description}
-\end{frame}
-
-\subsection{Recap}
-
-
-\begin{frame}
-		\frametitle{\secname}
-		\framesubtitle{\subsecname}
 
 		We have seen:
 		\begin{itemize}
 				\item How to model an integer multiplication as an acyclic convolution
 				\item How to express convolutions as a sequence of DFT, DWT and dyadic products
-				\item How to efficiently calculate the DFT and DWT using the FFT
+				\item How to efficiently calcualte the DFT and DWT using the FFT
 				\item How to transform the work into a domain where many of the
 						operations are much more efficient
 		\end{itemize}
