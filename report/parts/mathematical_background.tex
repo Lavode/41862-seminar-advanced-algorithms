@@ -6,8 +6,6 @@ transform and discrete weighted transform, along with a way to efficiently
 calculate either by means of the fast Fourier transform. It will then provide
 an introduction into convolution theory, and show how convolutions and the
 discrete Fourier transform are linked.
-Lastly it will show how to model the problem of integer multiplication as a
-form of convolution.
 
 \section{Notation}
 
@@ -108,7 +106,7 @@ with components as follows. It is visualized in figure
 \ref{fig:acyclic_convolution}:
 
 \begin{align*}
-		u_k & \coloneqq \sum_{i + j = n} x_i \cdot y_i \\
+		u_k & \coloneqq \sum_{i + j = k} x_i \cdot y_i \\
 		u_{2n - 1} & \coloneqq 0
 \end{align*}
 
@@ -177,6 +175,7 @@ it did not.
 \end{figure}
 
 \subsection{Relations between convolutions}
+\label{sec:relations_between_convolutions}
 
 Various relations between the different types of convolutions exist. One we
 will use is the following. Let $L(x)$ be the left-padding of the $n$-length
@@ -191,6 +190,7 @@ That is the acyclic convolution of the left padded signals is equal to the
 cyclic and negacyclic convolution of the unpadded signals.
 
 \subsection{Convolution theorem}
+\label{sec:convolution_theorem}
 
 It can further be shown that the cyclic convolution and weighted cyclic
 convolution can be calculated by means of the DFT and DWT:
@@ -221,5 +221,3 @@ convolution will be the negacyclic convolution:
 \[
 		x \times_a y = (x \times_H y) - (x \times y - x \times_H y) = 2 \cdot (x \times_H y) - (x \times y) = x \times_\_ y
 \]
-
-\section{Modelling integer multiplication as convolution}

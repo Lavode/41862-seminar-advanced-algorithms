@@ -20,6 +20,10 @@
 % Floats
 \usepackage{float}
 
+% Algorithms using algorithmicx package (with its algpseudocode command set)
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
 % Enhanced verbatim sections. We're mainly interested in
 % \verbatiminput though.
 \usepackage{verbatim}
@@ -84,6 +88,7 @@
 \DeclareMathOperator{\fft}{FFT}
 \DeclareMathOperator{\dft}{DFT}
 \DeclareMathOperator{\dwt}{DWT}
+\DeclareMathOperator{\intdiv}{div}
 
 % Sets!
 \newcommand{\setnat}{\mathbb{N}}
@@ -135,6 +140,8 @@
 \include{parts/introduction}
 
 \include{parts/mathematical_background}
+
+\include{parts/integer_multiplication_convolution}
 
 \printbibliography
 
