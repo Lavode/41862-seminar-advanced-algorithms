@@ -1,0 +1,36 @@
+\chapter{Introduction}
+\label{chapter:introduction}
+
+This report aims to provide the reader an introduction into the fast integer
+multiplication algorithm proposed by Schönhage and Strassen in 1971.
+\autocite{schonhageSchnelleMultiplikationGrosser1971}
+
+% TODO make sure this is actually correct :)
+It will start with a discussion of the problem to be solved and historical
+solutions in chapter \ref{chapter:introduction}. Chapter
+\ref{chapter:mathematical_background} will introduce the required mathematical
+background. Chapter \ref{chapter:fast_integer_multiplication} will then introduce
+the algorithm, and explain its workings. Finally we will conclude in chapter
+\ref{chapter:conclusion}.
+
+\section{Problem statement}
+
+The problem the Schönhage-Strassen algorithm intends to solve is to, given two
+integers $x, y \in \mathbb{Z}$, calculate their product $z \coloneqq x \cdot
+y$.
+
+\section{Historical algorithms}
+
+\subsection{Long multiplication}
+
+One of the most common algorithm for multiplication taught in school is known
+as `long multiplication'. Given a representation of the multiplicand and
+multiplier in some base --- commonly base 10 --- each digit of the multiplicand
+is multiplied by each digit of the multiplier. All intermediary products
+encoding for the same digit of the chosen base will then be summed up. Finally
+a potential carry propagation takes place, yielding a representation of the
+product in the chosen base.
+
+It is trivial to see that this algorithm requires $O(n^2)$ multiplication and additions.
+
+% TODO Karatsuba / Toom-Cook?
