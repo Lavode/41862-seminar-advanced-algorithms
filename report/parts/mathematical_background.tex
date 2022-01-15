@@ -92,26 +92,26 @@ components as follows:
 		u_{2n} & \coloneqq 0
 \end{align*}
 
-\subsection{Halfcyclic convolution}
+\subsection{Half-cyclic convolution}
 
-The halfcylic convolution $w = x \times_H y$, visualized in figure
+The half-cyclic convolution $w = x \times_H y$, visualized in figure
 \ref{fig:halfcyclic_convolution}, is defined as the $n$-length signal
-consisting of the first $n$ components of the acylic convolution $x \times_A
+consisting of the first $n$ components of the acyclic convolution $x \times_A
 y$:
 \[
 		w_k \coloneqq (x \times_A y)(k)
 \]
 
-\subsection{Negayclic convolution}
+\subsection{Negacyclic convolution}
 
-The negacylic convolution $v = x \times_\_ y$, visualized in figure
+The negacyclic convolution $v = x \times_\_ y$, visualized in figure
 \ref{fig:negacyclic_convolution}, is defined as the $n$-length signal with
 components as follows:
 \[
 		v_k \coloneqq \sum_{i + j = n} x_i \cdot y_i - \sum_{i + j = n + k} x_i \cdot y_i
 \]
 
-It can be seen that the negacylic convolution splits the summands of each
+It can be seen that the negacyclic convolution splits the summands of each
 signal component of the cyclic convolution into those where the modular
 addition operation of the indices `wrapped around', and those where it did not.
 Those where it wrapped around are then subtracted from the sum of those where
@@ -134,7 +134,7 @@ it did not.
 		\begin{subfigure}{.33\textwidth}
 				\centering
 				\includegraphics[width=0.9\textwidth]{../resources/halfcyclic_convolution.drawio.png}
-				\caption{Halfcyclic convolution}
+				\caption{Half-cyclic convolution}
 				\label{fig:halfcyclic_convolution}
 		\end{subfigure}
 		\begin{subfigure}{.66\textwidth}

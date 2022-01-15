@@ -10,7 +10,7 @@ rounding errors, as well as being generally slow.
 
 The algorithm proposed by Schönhage and Strassen will thus work in
 $\setint_{2^n + 1}$, that is the ring of integers modulo $2^n + 1$. This has
-the advantage of only utilizing integer arithmetic, which is fast and prevents
+the advantage of only utilising integer arithmetic, which is fast and prevents
 rounding errors.
 
 \subsection{Non-modular multiplication}
@@ -74,7 +74,7 @@ that, when applied recursively, the requirement that $D | n$ in line
 		\label{alg:ssmult_split_inputs}
 \end{algorithm}
 
-\subsection{Calculate negacylcic convolution}
+\subsection{Calculate negacyclic convolution}
 
 We now will calculate the negacyclic convolution $Z = X \times_{\_} Y$. Recall
 that as per section \ref{sec:convolution_theorem} this can be achieved via the
@@ -156,7 +156,7 @@ algorithm \ref{alg:ssmult_inverse_dft}.
 		\label{alg:ssmult_inverse_dft}
 \end{algorithm}
 
-Lastly an adjustement is required as some of the values may be negative. If any
+Lastly an adjustment is required as some of the values may be negative. If any
 of the $Z_i$ exceeds its largest possible value $(i + 1) 2^{2M}$, the modulus
 $2^{n'} + 1$ will be subtracted, as shown in algorithm
 \ref{alg:ssmult_adjust_negative}.
