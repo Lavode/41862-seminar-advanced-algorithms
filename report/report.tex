@@ -83,6 +83,7 @@
 
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 
 % Custom operators
 \DeclareMathOperator{\fft}{FFT}
@@ -92,6 +93,10 @@
 
 % Sets!
 \newcommand{\setnat}{\mathbb{N}}
+\newcommand{\setint}{\mathbb{Z}}
+
+% Various math
+\newcommand{\fermatnum}[1]{F_{#1}}
 
 % Bullet point
 \newcommand{\tabitem}{~~\llap{\textbullet}~~}
@@ -142,6 +147,8 @@
 \include{parts/mathematical_background}
 
 \include{parts/integer_multiplication_convolution}
+
+\include{parts/schoenhage_strassen}
 
 \printbibliography
 

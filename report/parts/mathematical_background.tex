@@ -92,8 +92,7 @@ with components as follows. It is visualized in figure
 \subsection{Weighted cyclic convolution}
 
 The weighted cyclic convolution $z = x \times_a y$, with an $n$-length weight
-vector $a$, is defined as the $n$-length signal with components as follows. It
-is visualized in figure \ref{fig:weighted_cyclic_convolution}.
+vector $a$, is defined as the $n$-length signal with components as follows.
 
 \[
 		z_k = \frac{1}{a_k} \sum_{i + j \equiv k \pmod{n}} (x_i a_i) \cdot (y_j a_j)
@@ -178,16 +177,31 @@ it did not.
 \label{sec:relations_between_convolutions}
 
 Various relations between the different types of convolutions exist. One we
-will use is the following. Let $L(x)$ be the left-padding of the $n$-length
-signal $x$ to length $2n$ with signal components of value $0$. Then it holds
-that: \autocite{crandallPrimeNumbersComputational2005}
+will use is the following. Let $L(x)$ be the left half of an even-length
+signal. That is if $x = (x_1, x_2, \ldots, x_{2n})$, then $L(x) = (x_1, x_2,
+\ldots, x_n)$. Consider now two length-$2n$ signals $x, y$, with the upper half
+of either signal being $0$. That is $x_i = y_i = 0, n + 1 \leq i \leq 2n$. Then
+it holds that: \autocite{crandallPrimeNumbersComputational2005}
 
 \[
-		L(x) \times_A L(y) = x \times y = x \times_\_ y
+		L(x) \times_A L(y) = x \times y = x \times_\_ y = x \times_H y
 \]
 
-That is the acyclic convolution of the left padded signals is equal to the
-cyclic and negacyclic convolution of the unpadded signals.
+These equalities all follow directly from the definition of the convolutions,
+using the fact that the upper halves of the input signals are equal to zero.
+
+% Equality of the cyclic and half-cyclic convolution follows directly from their
+% definition. They only differ in whether products containing the upper halves of
+% the input signals are added to the output signal or not. As the upper halves of
+% the input signals are zero however, the two convolutions are equal.
+% 
+% Equality of the cyclic and negacyclic follows equivalently in that they only
+% differ in whether the products containing the upper halves are added or
+% subtracted.
+% 
+% Equality of the half-cyclic of the full and acylic of the lower halves of the
+% input signals then follows as seen earlier, in that the half-cyclic is equal to
+% the left half of the acyclic of the full.
 
 \subsection{Convolution theorem}
 \label{sec:convolution_theorem}

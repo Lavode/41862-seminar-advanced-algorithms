@@ -28,6 +28,13 @@ acyclic convolution $u = x \times_A y$. This is further illustrated in figure
 		\label{fig:multiplication_convolution}
 \end{figure}
 
+\subsection{Modular integer multiplication as a convolution operation}
+\label{sec:modular_integer_multiplication_convolution}
+
+Similarly one can show that the negacyclic convolution $x \times_{\_} y$ is
+equivalent to a multiplication operation modulo $B^n + 1$ with delayed carry
+operation.
+
 \subsection{Applying the delayed carry operation}
 
 Given $u = x \otimes y$, one can calculate the result of a regular
@@ -43,7 +50,7 @@ $\intdiv$ denote integer division:
 
 This now allows specification of a basic algorithm for fast integer
 multiplication using the FFT, as done by e.g. Crandall and Pomerance, shown in
-algorithm \ref{alg:fft_int_mult}.
+algorithm \ref{alg:fft_int_mult}.\autocite{crandallPrimeNumbersComputational2005}
 
 The algorithm starts by zero-padding the two input signals to length $2n$, and
 then calculates $\dft^{-1}(\dft(x_{\text{padded}}) \cdot
@@ -80,3 +87,11 @@ the result $z = x \cdot y$.
 		\end{algorithmic}
 		\label{alg:fft_int_mult}
 \end{algorithm}
+
+\subsection{Recursive application of algorithm}
+
+Observe that the required multiplications for e.g. the dyadic product can be
+calculated by recursively applying the algorithm, choosing an appropriate base
+$B$ for each iteration. As shown by Crandall and Pomerance a suitable choice of
+the base will thus achieve an overall runtime complexity of $O(n \log(n)
+\log(\log(n)))$. \autocite{crandallPrimeNumbersComputational2005}

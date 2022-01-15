@@ -1,0 +1,224 @@
+\chapter{Schönhage-Strassen algorithm for integer multiplication}
+\label{chapter:schoenhage_strassen}
+
+\section{Motivation}
+
+While the basic algorithm shown before is functional in terms of pure
+mathematics, it is not ideal for implementation in software or hardware. Its
+reliance on floating-point arithmetic both introduces the potential for
+rounding errors, as well as being generally slow.
+
+The algorithm proposed by Schönhage and Strassen will thus work in
+$\setint_{2^n + 1}$, that is the ring of integers modulo $2^n + 1$. This has
+the advantage of only utilizing integer arithmetic, which is fast and prevents
+rounding errors.
+
+\subsection{Non-modular multiplication}
+
+Note that his is not a limitation if one wants to calculate the non-modular
+product. As hinted at by Crandall and Pomerance,
+\autocite{crandallPrimeNumbersComputational2005} a choice of $n \geq
+\ceil{\log_2(x)} + \ceil{\log_2(y)}$ will ensure that $xy < 2^n + 1$, so the
+product modulo $2^n + 1$ will be equal to the non-modular product:
+
+\begin{align*}
+		xy & < 2^{\ceil{\log_2(xy)}} + 1 \\
+		   & \leq 2^{\ceil{\log_2(x)} + \ceil{\log_2(y)}} + 1
+\end{align*}
+
+\section{Algorithm}
+
+We will now present the algorithm as described by Crandall and Pomerance
+\autocite{crandallPrimeNumbersComputational2005} piece by piece, providing
+explanations and references as to what each section does.
+
+Let $0 \leq x, y < 2^n + 1$ be two integers we wish to multiply modulo $2^n +
+1$.
+
+\subsection{Splitting inputs into smaller parts}
+
+In a first step shown in algorithm \ref{alg:ssmult_split_inputs}, the inputs
+$x$ and $y$ are split into $D$ parts of length $M$ bits each. As such, $X$ and
+$Y$ as shown will thus be a base-$2^M$ representation of $x$ and $y$
+respectively.
+
+In order for the recursion to make progress, we then pick an auxiliary modulus
+$2^{n'} + 1$. This modulus is chosen large enough such that no component of the
+subsequent negacyclic convolution will be reduced. Indeed observe that if $Z = X
+\times_\_ Y$, then:
+\begin{align*}
+		Z_i & \leq D \cdot \max(X_i Y_j) && \text{By the definition of the negacyclic convolution} \\
+			& \leq D \cdot \max(X_i) \cdot \max(Y_j) \\
+			& < D \cdot 2^M \cdot 2^M && \text{As a result of how $x, y$ were split into $X, Y$} \\
+			& = D \cdot 2^{2M}
+\end{align*}
+
+And so indeed $\log_2(Z_i) < \log_2(D) + \log_2(2^{2M}) = k + 2M$, such that we
+can subsequently work modulo $2^{n'} + 1$ without falsifying the result.
+
+Note that $n'$ is chosen as an integer multiple of $D = 2^k$. This ensures
+that, when applied recursively, the requirement that $D | n$ in line
+\ref{algline:d_divides_n} of algorithm \ref{alg:ssmult_split_inputs} will hold.
+
+\begin{algorithm}
+		\caption{Schönhage-Strassen integer multiplication: Split inputs}
+		\begin{algorithmic}[1]
+				\Function{Schönhage-Strassen-Mult}{$x, y$}
+				\State $D \gets 2^k$ such that $D | n$
+				\label{algline:d_divides_n}
+				\State $M \gets 2^l$ such that $DM = n$
+				\State Pick smallest $n' \geq 2M + k$ such that $n' = DM'$
+				\State $X \gets $\Call{Split}{x, D}
+				\State $Y \gets $\Call{Split}{y, D}
+				\algstore{ssmult}
+		\end{algorithmic}
+		\label{alg:ssmult_split_inputs}
+\end{algorithm}
+
+\subsection{Calculate negacylcic convolution}
+
+We now will calculate the negacyclic convolution $Z = X \times_{\_} Y$. Recall
+that as per section \ref{sec:convolution_theorem} this can be achieved via the
+weighted cyclic convolution, using a weight vector $(a_j) = A^j$ where $A$ is a
+$2D$-th root of unity.
+
+Observe first that $2^{2M'}$ is a $D$-th root of unity modulo $2^{n'} + 1$:
+\begin{align*}
+		(2^{2M'})^D - 1 & = 2^{2M'D} - 1\\
+						& = 2^{2n'} - 1 \\
+						& = (2^{n'} + 1) (2^{n'} - 1) \\
+						& \Rightarrow 2^{2M'} \equiv 1 \pmod{2^{n'} + 1}
+\end{align*}
+
+And so $A \coloneqq 2^{M'}$ is a $2D$-th root of unity modulo $2^{n'} + 1$ as
+required. We will thus first weight each component $X_i$ and $Y_i$ with $A^j$,
+shown in algorithm \ref{alg:ssmult_weight_inputs}.
+
+\begin{algorithm}
+		\caption{Schönhage-Strassen integer multiplication: Weight inputs with $2D$-th root of unity}
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\For{$i \gets 0, D$}
+				\State $X_i \gets (2^{jM'} X_i) \bmod (2^{n'} + 1)$
+				\State $Y_i \gets (2^{jM'} Y_i) \bmod (2^{n'} + 1)$
+				\EndFor
+				\algstore{ssmult}
+		\end{algorithmic}
+		\label{alg:ssmult_weight_inputs}
+\end{algorithm}
+
+We will then apply the $\dft$ to each of $X$ and $Y$, and perform the
+component-wise multiplication, shown in algorithm \ref{alg:ssmult_dft}.
+
+\begin{algorithm}
+		\caption{Schönhage-Strassen integer multiplication: Apply DFT}
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\State $X \gets$ \Call{DFT}{X}
+				\State $Y \gets$ \Call{DFT}{Y}
+				\\
+				\For{$i \gets 0, D$}
+				\State $X_i \gets X_i Y_i \bmod(2^{n'} + 1)$
+				\EndFor
+				\algstore{ssmult}
+		\end{algorithmic}
+		\label{alg:ssmult_dft}
+\end{algorithm}
+
+Finally we must apply the inverse $\dft$. Here a trick is used as described by
+Duhamel et al\autocite{duhamelComputingInverseDFT1988}, which allows to compute
+the inverse $\dft$ by means of the forward $\dft$, followed by a reversal of
+indices. The described algorithm combines this with the required division by
+the $A^j$, the $2D$-th root of unity used in the forward direction, shown in
+algorithm \ref{alg:ssmult_inverse_dft}.
+
+\begin{algorithm}
+		\caption{Schönhage-Strassen integer multiplication: Apply inverse DFT}
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\State $X \gets$ \Call{DFT}{X}
+
+				\For{$i \gets 0, D$}
+				\State $Z_i \gets X_{D - i} / 2^{k + jM'} \bmod (2^{n'} + 1)$
+				\algstore{ssmult}
+		\end{algorithmic}
+		\label{alg:ssmult_inverse_dft}
+\end{algorithm}
+
+Lastly an adjustement is required as some of the values may be negative. If any
+of the $Z_i$ exceeds its largest possible value $(i + 1) 2^{2M}$, the modulus
+$2^{n'} + 1$ will be subtracted, as shown in algorithm
+\ref{alg:ssmult_adjust_negative}.
+
+\begin{algorithm}
+		\caption{Schönhage-Strassen integer multiplication: Handle negative values of negacyclic convolution}
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\If{$Z_i > (i + 1) \cdot 2^{2M}$}
+				\State $Z_i \gets Z_i - (2^{n'} + 1)$
+				\EndIf
+				\EndFor
+				\algstore{ssmult}
+		\end{algorithmic}
+		\label{alg:ssmult_adjust_negative}
+\end{algorithm}
+
+At this point, $Z$ will contain the negacyclic convolution $X \times_{\_} Y$,
+which is the result of the integer multiplication with delayed carry operation,
+modulo $2^{n} + 1$.
+
+\subsection{Carry operation and final reduction}
+
+Now a regular carry operation will be performed, and the final carry will be
+added to the high-order side of the output signal, shown in algorithm
+\ref{alg:ssmult_carry}.
+
+\begin{algorithm}
+		\caption{Schönhage-Strassen integer multiplication: Carry operation}
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\State $carry \gets 0$
+				\For{$i \gets 0$ to $D$}
+				\State $v \gets Z_i + carry$
+				\State $Z_i \gets v \mod 2^M$
+				\State $carry \gets v \intdiv 2^M$
+				\EndFor
+				\If{$carry > 0$}
+				\State Include $carry$ as high-order word $Z_{D+1}$
+				\EndIf
+				\algstore{ssmult}
+		\end{algorithmic}
+		\label{alg:ssmult_carry}
+\end{algorithm}
+
+Then a final reduction modulo $2^{n} + 1$ will be performed. If this modulus
+was chosen sufficiently large, then the result will be a regular integer
+multiplication, otherwise a modular one, shown in algorithm
+\ref{alg:ssmult_reduction}.
+
+\begin{algorithm}
+		\caption{Schönhage-Strassen integer multiplication: Final reduction}
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\State $Z \gets Z \bmod (2^n + 1)$
+				\algstore{ssmult}
+		\end{algorithmic}
+		\label{alg:ssmult_reduction}
+\end{algorithm}
+
+Finally, the contents of $Z$ will be returned. They now contain the desired
+product $x \times y \bmod (2^n + 1)$ in base-$2^M$, shown in algorithm
+\ref{alg:ssmult_return}.
+
+\begin{algorithm}
+		\caption{Schönhage-Strassen integer multiplication: Returning result}
+		\begin{algorithmic}[1]
+				\algrestore{ssmult}
+				\State \textbf{Return} $\{Z_0, Z_1, \ldots, Z_{D+1}\}$
+				\EndFunction
+		\end{algorithmic}
+		\label{alg:ssmult_return}
+\end{algorithm}
+
+
+		% TODO recursion, choice of M, D, applicability
