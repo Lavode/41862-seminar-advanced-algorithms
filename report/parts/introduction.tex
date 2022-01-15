@@ -5,16 +5,16 @@ This report aims to provide the reader an introduction into the fast integer
 multiplication algorithm proposed by Schönhage and Strassen in 1971.
 \autocite{schonhageSchnelleMultiplikationGrosser1971}
 
-% TODO make sure this is actually correct :)
 It will start with a discussion of the problem to be solved and historical
 solutions in chapter \ref{chapter:introduction}. Chapter
 \ref{chapter:mathematical_background} will introduce the required mathematical
-background. Chapter \ref{chapter:integer_multiplication_convolution} will show
+background, with a focus on convolution theory and the Discrete Fourier
+Transform.. Chapter \ref{chapter:integer_multiplication_convolution} will show
 how to model the problem of integer multiplication as a convolution problem,
 along with a basic algorithm to solve it. Chapter
-\ref{chapter:schoenhage_strassen} will then introduce the algorithm,
-and explain its workings. Finally we will conclude in chapter
-\ref{chapter:conclusion}.
+\ref{chapter:schoenhage_strassen} will then introduce the Schönhage-Strassen
+algorithm, and explain various of its details. Finally we will conclude in
+chapter \ref{chapter:conclusion}.
 
 \section{Problem statement}
 
@@ -22,11 +22,11 @@ The problem the Schönhage-Strassen algorithm intends to solve is to, given two
 integers $x, y \in \mathbb{Z}$, calculate their product $z \coloneqq x \cdot
 y$.
 
-\section{Historical algorithms}
+\section{Historical development}
 
 \subsection{Long multiplication}
 
-One of the most common algorithm for multiplication taught in school is known
+One of the most common algorithms for multiplication taught in school is known
 as `long multiplication'. Given a representation of the multiplicand and
 multiplier in some base --- commonly base 10 --- each digit of the multiplicand
 is multiplied by each digit of the multiplier. All intermediary products
@@ -34,6 +34,17 @@ encoding for the same digit of the chosen base will then be summed up. Finally
 a potential carry propagation takes place, yielding a representation of the
 product in the chosen base.
 
-It is trivial to see that this algorithm requires $O(n^2)$ multiplication and additions.
+It is trivial to see that this algorithm requires $O(n^2)$ multiplication and
+additions.
 
-% TODO Karatsuba / Toom-Cook?
+\subsection{Work leading up to Schönhage-Strassen}
+
+For a while it had been conjectured that an asymptotic complexity $\Omega(n^2)$
+was ideal for the problem of integer multiplication. In 1962, Karatsuba found
+an algorithm where one multiplication of two $2n$-digit numbers could be
+replaced with three multiplications of $n$-digit numbers. This lead to an
+asymptotic complexity of $\approx O(n^{1.58})$. In 1963 and 1966, Toom and Cook
+generalized Karatsuba's approach to a complexity of $O(n^{1.46})$. In 1971
+finally, Schönhage and Strassen proposed an algorithm with complexity $O(n
+\log(n) \log(\log(n)))$ which we will discuss
+here.

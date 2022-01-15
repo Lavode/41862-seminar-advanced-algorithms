@@ -1,0 +1,37 @@
+\chapter{Conclusion}
+\label{chapter:conclusion}
+
+This report has provided an overview of the Schönhage-Strassen algorithm. It
+has provided an introduction into convolution theory, and has shown how to
+calculate convolutions using the DWT and DFT.
+
+It has also shown how to model normal and modular integer multiplication as a
+convolution problem, which can be efficiently calculated by means of the DFT
+and DWT.
+
+Lastly it has shown the workings of the Schönhage-Strassen multiplication
+algorithm, which works in $\setint_{2^n + 1}$ the ring of integers modulo $2^n
++ 1$. It has shown how this circumvents rounding problems, allows using fast
+integer arithmetics, and allows speeding up multiplications by roots of unity
+as they can be chosen to be powers of two.
+
+Lastly it should be noted that the Schönhage-Strassen algorithm has a
+relatively large overhead. As such its asymptotic complexity does not start to
+be advantageous, until the integers to be multiplied are rather large. As a
+rule of thumb, the following multiplication algorithms are best used for
+integers of various sizes:
+
+\begin{description}
+		\item[Up to hardware word size (e.g. $2^{64}$)] Hardware multiplication
+		\item[After 64 bits] Long multiplication
+		\item[After 512 bits] Karatsuba / Toom-Cook
+		\item[After $2^{16}$ bits] Schönhage-Strassen multiplication
+		\item[After $2^{64}$ bits] Fürer's algorithm
+\end{description}
+
+As a final note: In 2019, Harvey and van der Hoeven published an algorithm for
+integer multiplication with an asymptotic complexity of $O(n \log(n))$.
+\autocite{harveyIntegerMultiplicationTime2021} While their algorithm is not
+practical for any computations fitting into the observable universe, they did
+thereby reach the complexity which Schönhage and Strassen had conjectured to be
+optimal in 1971.

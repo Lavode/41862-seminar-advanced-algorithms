@@ -5,18 +5,16 @@ We now aim to show how the problem of integer multiplication can be phrased as
 a convolution problem, and then present a basic algorithm to perform integer
 multiplications using the FFT.
 
-Consider $x, y$ two $n$-digit numbers in some base $B$, where $x_0, y_0$ is the
+Consider $x, y$ two $n$-digit numbers in some base $B$, where $x_1, y_1$ is the
 least significant digit.
 
 \section{Integer multiplication as a convolution operation}
 
 Let $\otimes$ be an integer multiplication with delayed carry operation. That
 is $u = x \otimes y$ is defined as follows:
-
 \begin{align*}
 		u_i & = \sum_{j + k = i} x_j y_k
 \end{align*}
-
 Observe how by this definition the operation $u = x \otimes y$ is exactly the
 acyclic convolution $u = x \times_A y$. This is further illustrated in figure
 \ref{fig:multiplication_convolution}.
@@ -24,7 +22,11 @@ acyclic convolution $u = x \times_A y$. This is further illustrated in figure
 \begin{figure}
 		\centering
 		\includegraphics[width=0.6\textwidth]{../resources/multiplication_convolution.drawio.png}
-		\caption{Integer multiplication with delayed carry operation is equivalent to acyclic convolution}
+		\caption{
+				Integer multiplication with delayed carry operation is
+				equivalent to acyclic convolution. Again, indices here are
+				zero-index rather than one-indexed.
+		}
 		\label{fig:multiplication_convolution}
 \end{figure}
 
@@ -40,17 +42,17 @@ operation.
 Given $u = x \otimes y$, one can calculate the result of a regular
 multiplication $v = x \cdot y$ by applying the carry operation. Let
 $\intdiv$ denote integer division:
-
 \begin{align*}
-		\overline{v}_i & = u_i + (\overline{v}_{i-1} \intdiv B) \\
-		v_i & = \overline{v}_i \bmod B
+		c_1 & = u_0 \\
+		c_i & = u_i + (c_{i-1} \intdiv B) \\
+		v_i & = c_i \bmod B
 \end{align*}
 
 \section{Integer multiplication with the FFT}
 
-This now allows specification of a basic algorithm for fast integer
-multiplication using the FFT, as done by e.g. Crandall and Pomerance, shown in
-algorithm \ref{alg:fft_int_mult}.\autocite{crandallPrimeNumbersComputational2005}
+This now allows specifying a basic algorithm for fast integer multiplication
+using the FFT, as done by e.g. Crandall and Pomerance, shown in algorithm
+\ref{alg:fft_int_mult}.\autocite{crandallPrimeNumbersComputational2005}
 
 The algorithm starts by zero-padding the two input signals to length $2n$, and
 then calculates $\dft^{-1}(\dft(x_{\text{padded}}) \cdot
@@ -71,7 +73,7 @@ the result $z = x \cdot y$.
 				\\
 				\State $X \gets$ \Call{DFT}{x}
 				\State $Y \gets$ \Call{DFT}{y}
-				\State $Z \gets X \cdot Y$ \Comment{Dyadic product}
+				\State $Z \gets X \cdot Y$ \Comment{Component-wise product}
 				\State $z \gets$ $\Call{DFT}{Z}^{-1}$
 				\State $z \gets$ \Call{round}{z}
 				\\
@@ -82,7 +84,6 @@ the result $z = x \cdot y$.
 				\State $carry \gets v \intdiv B$
 				\EndFor
 				\State \textbf{Return} $z_0 || z_1 || \ldots || z_n || carry$
-				\\
 				\EndFunction
 		\end{algorithmic}
 		\label{alg:fft_int_mult}
@@ -90,8 +91,8 @@ the result $z = x \cdot y$.
 
 \subsection{Recursive application of algorithm}
 
-Observe that the required multiplications for e.g. the dyadic product can be
-calculated by recursively applying the algorithm, choosing an appropriate base
-$B$ for each iteration. As shown by Crandall and Pomerance a suitable choice of
-the base will thus achieve an overall runtime complexity of $O(n \log(n)
-\log(\log(n)))$. \autocite{crandallPrimeNumbersComputational2005}
+Observe that the required multiplications for e.g. the component-wise product
+can be calculated by recursively applying the algorithm, choosing an
+appropriate base $B$ for each iteration. As shown by Crandall and Pomerance a
+suitable choice of the base will thus achieve an overall runtime complexity of
+$O(n \log(n) \log(\log(n)))$. \autocite{crandallPrimeNumbersComputational2005}

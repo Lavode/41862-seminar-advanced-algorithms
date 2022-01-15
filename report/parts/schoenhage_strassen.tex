@@ -20,10 +20,10 @@ product. As hinted at by Crandall and Pomerance,
 \autocite{crandallPrimeNumbersComputational2005} a choice of $n \geq
 \ceil{\log_2(x)} + \ceil{\log_2(y)}$ will ensure that $xy < 2^n + 1$, so the
 product modulo $2^n + 1$ will be equal to the non-modular product:
-
 \begin{align*}
 		xy & < 2^{\ceil{\log_2(xy)}} + 1 \\
-		   & \leq 2^{\ceil{\log_2(x)} + \ceil{\log_2(y)}} + 1
+		   & \leq 2^{\ceil{\log_2(x)} + \ceil{\log_2(y)}} + 1 \\
+		   & \Rightarrow xy < 2^n + 1
 \end{align*}
 
 \section{Algorithm}
@@ -52,7 +52,6 @@ subsequent negacyclic convolution will be reduced. Indeed observe that if $Z = X
 			& < D \cdot 2^M \cdot 2^M && \text{As a result of how $x, y$ were split into $X, Y$} \\
 			& = D \cdot 2^{2M}
 \end{align*}
-
 And so indeed $\log_2(Z_i) < \log_2(D) + \log_2(2^{2M}) = k + 2M$, such that we
 can subsequently work modulo $2^{n'} + 1$ without falsifying the result.
 
@@ -79,28 +78,36 @@ that, when applied recursively, the requirement that $D | n$ in line
 
 We now will calculate the negacyclic convolution $Z = X \times_{\_} Y$. Recall
 that as per section \ref{sec:convolution_theorem} this can be achieved via the
-weighted cyclic convolution, using a weight vector $(a_j) = A^j$ where $A$ is a
+weighted cyclic convolution, using a weight vector $(a_i) = A^i$ where $A$ is a
 $2D$-th root of unity.
+
+Note that we choose the negacyclic rather than the cyclic convolution since, as
+seen in section \ref{sec:modular_integer_multiplication_convolution}, this will
+allow us to calculate the reduction modulo $2^n + 1$ `for free'.
 
 Observe first that $2^{2M'}$ is a $D$-th root of unity modulo $2^{n'} + 1$:
 \begin{align*}
 		(2^{2M'})^D - 1 & = 2^{2M'D} - 1\\
 						& = 2^{2n'} - 1 \\
 						& = (2^{n'} + 1) (2^{n'} - 1) \\
-						& \Rightarrow 2^{2M'} \equiv 1 \pmod{2^{n'} + 1}
+						& \Rightarrow (2^{2M'})^D \equiv 1 \pmod{2^{n'} + 1}
 \end{align*}
 
 And so $A \coloneqq 2^{M'}$ is a $2D$-th root of unity modulo $2^{n'} + 1$ as
-required. We will thus first weight each component $X_i$ and $Y_i$ with $A^j$,
+required. We will thus first weight each component $X_i$ and $Y_i$ with $A^i$,
 shown in algorithm \ref{alg:ssmult_weight_inputs}.
+
+Having the root of unit be a power of two allows multiplications and divisions
+with it --- as are required for e.g. the DWT and FFT --- to be done very
+efficiently as bit shifts.
 
 \begin{algorithm}
 		\caption{Schönhage-Strassen integer multiplication: Weight inputs with $2D$-th root of unity}
 		\begin{algorithmic}[1]
 				\algrestore{ssmult}
 				\For{$i \gets 0, D$}
-				\State $X_i \gets (2^{jM'} X_i) \bmod (2^{n'} + 1)$
-				\State $Y_i \gets (2^{jM'} Y_i) \bmod (2^{n'} + 1)$
+				\State $X_i \gets (2^{iM'} X_i) \bmod (2^{n'} + 1)$
+				\State $Y_i \gets (2^{iM'} Y_i) \bmod (2^{n'} + 1)$
 				\EndFor
 				\algstore{ssmult}
 		\end{algorithmic}
@@ -108,7 +115,11 @@ shown in algorithm \ref{alg:ssmult_weight_inputs}.
 \end{algorithm}
 
 We will then apply the $\dft$ to each of $X$ and $Y$, and perform the
-component-wise multiplication, shown in algorithm \ref{alg:ssmult_dft}.
+component-wise multiplication, shown in algorithm \ref{alg:ssmult_dft}. This
+component-wise multiplication can be done with any multiplication algorithm. As
+such one can e.g.  recursively use the Schönhage-Strassen algorithm as long as
+inputs are large, and then default to another algorithm --- or native hardware
+multiplication --- once numbers are sufficiently small.
 
 \begin{algorithm}
 		\caption{Schönhage-Strassen integer multiplication: Apply DFT}
@@ -129,7 +140,7 @@ Finally we must apply the inverse $\dft$. Here a trick is used as described by
 Duhamel et al\autocite{duhamelComputingInverseDFT1988}, which allows to compute
 the inverse $\dft$ by means of the forward $\dft$, followed by a reversal of
 indices. The described algorithm combines this with the required division by
-the $A^j$, the $2D$-th root of unity used in the forward direction, shown in
+$A^i$, the $2D$-th root of unity used in the forward direction, shown in
 algorithm \ref{alg:ssmult_inverse_dft}.
 
 \begin{algorithm}
@@ -139,7 +150,7 @@ algorithm \ref{alg:ssmult_inverse_dft}.
 				\State $X \gets$ \Call{DFT}{X}
 
 				\For{$i \gets 0, D$}
-				\State $Z_i \gets X_{D - i} / 2^{k + jM'} \bmod (2^{n'} + 1)$
+				\State $Z_i \gets X_{D - i} / 2^{k + iM'} \bmod (2^{n'} + 1)$
 				\algstore{ssmult}
 		\end{algorithmic}
 		\label{alg:ssmult_inverse_dft}
@@ -220,5 +231,12 @@ product $x \times y \bmod (2^n + 1)$ in base-$2^M$, shown in algorithm
 		\label{alg:ssmult_return}
 \end{algorithm}
 
+\section{Choice of $D$}
 
-		% TODO recursion, choice of M, D, applicability
+Recall that each level of recursion reduces multiplication of two size-$2^N =
+2^{DM}$ integers to $2^D$ multiplications of size-$2^M$ integers. It can be
+shown that the ideal choice is $D = \sqrt{N}$, to achieve a complexity of $O(n
+\log(n) \log(\log(n)))$\autocite{schonhageSchnelleMultiplikationGrosser1971}.
+In practice, values between $D = 4$ and $D = 16$ are used, depending on the
+length of the inputs and the hardware the computation is running on.
+\autocite{gaudryGmpbasedImplementationSchonhagestrassen2007}.
